@@ -18,5 +18,4 @@ if __name__ == '__main__':
     for item in db:
         data = {key: values[value] for key, value in item.items() if key != "name"}
         response = requests.post(url=url, data=data).json()
-        if isinstance(response, dict):
-            assert response == item
+        print(response)

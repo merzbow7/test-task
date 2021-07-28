@@ -58,17 +58,16 @@ def validate_date(date_string: str) -> Union[str, bool]:
     False
     """
     try:
-        datetime.strptime(date_string, "%d.%m.%Y").date()
+        datetime.strptime(date_string, "%d.%m.%Y")
     except ValueError:
         try:
-            datetime.strptime(date_string, "%Y - %m - %d").date()
+            datetime.strptime(date_string, "%Y - %m - %d")
         except ValueError:
-            pass
+            return False
         else:
             return date_string
     else:
         return date_string
-    return False
 
 
 validators = OrderedDict({
@@ -80,4 +79,5 @@ validators = OrderedDict({
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
