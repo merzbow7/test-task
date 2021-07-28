@@ -1,7 +1,9 @@
+import random
+
 import requests
 from tinydb import TinyDB
 
-from make_testcase import make_test_db
+from config import Config
 
 if __name__ == '__main__':
     values = {
@@ -12,10 +14,13 @@ if __name__ == '__main__':
     }
 
     url = "http://127.0.0.1:5000/get_form"
-    test_db = "test.json"
-    make_test_db(db_name=test_db, min_count_entries=100)
-    db = TinyDB(test_db)
-    for item in db:
-        data = {key: values[value] for key, value in item.items() if key != "name"}
-        response = requests.post(url=url, data=data).json()
-        print(response)
+
+    db = TinyDB(Config.DB)
+    size_db = len(db.all())
+
+    variant = dict(db.get(doc_id=random.randint(1, size_db)))
+    variant.update({"second_email_user": "email",
+                    "home_phone_user": "phone"})
+    data = {key: values[value] for key, value in variant.items() if key != "name"}
+    response = requests.post(url=url, data=data).json()
+    print(response, variant.get('name'))
