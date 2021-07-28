@@ -6,6 +6,7 @@ import requests
 from tinydb import TinyDB
 
 from config import Config
+from utils import typing_request
 
 
 class TestClass:
@@ -46,14 +47,22 @@ class TestClass:
         req = requests.post(self.url, data=test_data).json()
         assert req == {"email_secret": "email", "email_secret2": "email", "email_secret3": "email"}
 
-    def test_some_random_data(self):
-        test_data = {}
-        for i in range(10, randint(15, 25)):
-            key = choice(tuple(self.test_types.keys()))
-            test_data[key] = self.test_types[key]()
+    def test_some_not_valid_data(self):
+        size_db = len(self.db.all())
+        for _ in range(self.count_tests):
+            variant = dict(self.db.get(doc_id=randint(0, size_db)))
+            variant.pop("name")
+            for key, value in variant.items():
+                variant[key] = self.test_types[value]()
+            typed_data = typing_request(variant)
+            for key, value in variant.items():
+                if "email" in key:
+                    variant[key] = "wrong_mail@mail@com"
 
-        req = requests.post(self.url, data=test_data).json()
-        assert all([key == value for key, value in req.items()])
+            response = requests.post(self.url, data=variant).json()
+            assert response != typed_data
+
+
 
     def test_some_updated_random_data_from_db(self):
 
@@ -68,3 +77,8 @@ class TestClass:
 
             response = requests.post(self.url, data=data).json()
             assert response == variant.get('name')
+
+
+if __name__ == '__main__':
+    test = TestClass()
+    test.test_some_not_valid_data()
