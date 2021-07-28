@@ -18,9 +18,11 @@ if __name__ == '__main__':
     db = TinyDB(Config.DB)
     size_db = len(db.all())
 
-    variant = dict(db.get(doc_id=random.randint(1, size_db)))
-    variant.update({"second_email_user": "email",
-                    "home_phone_user": "phone"})
+    random_doc_id = random.randint(1, size_db)
+    variant = dict(db.get(doc_id=random_doc_id))
+    variant.popitem()
+    # variant.update({"second_email_user": "email",
+    #                 "home_phone_user": "phone"})
     data = {key: values[value] for key, value in variant.items() if key != "name"}
     response = requests.post(url=url, data=data).json()
     print(response, variant.get('name'))
