@@ -1,7 +1,5 @@
-# test-task
-app.py - flask сервер
-
-make_testcase.py - создание тестовой базы
-
-/tests/ - pytests
+#test-task
++ **app.py - flask сервер** 
++ **make_testcase.py - создание тестовой базы**
++ **/tests/ - pytest**
 

@@ -44,4 +44,4 @@ def make_test_db(*, min_count_entries: int = None, db_name: str = None) -> None:
 
 
 if __name__ == '__main__':
-    make_test_db(db_name=Config.DB, min_count_entries=1000)
+    make_test_db(db_name=Config.DB, min_count_entries=2500)
