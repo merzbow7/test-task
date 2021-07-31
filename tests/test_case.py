@@ -16,7 +16,7 @@ class TestClass:
     @pytest.fixture(autouse=True)
     def initialized_tasks_db(self):
         """Connect to db before testing, disconnect after."""
-        self.count_tests = 500
+        self.count_tests = 100
 
         self.path_db = Path(__file__).parent.parent / Config.DB
         self.db = TinyDB(self.path_db)
