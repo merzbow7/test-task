@@ -8,7 +8,6 @@ from tinydb import TinyDB
 
 from config import Config
 from utils import typing_request
-from validators import *
 
 
 class TestClass:
@@ -41,14 +40,14 @@ class TestClass:
         size_db = len(self.db.all())
 
         for _ in range(self.count_tests):
-            variant = dict(self.db.get(doc_id=randint(0, size_db)))
+            variant = dict(self.db.get(doc_id=randint(1, size_db)))
             test_data = {key: self.test_types[value]() for key, value in variant.items() if key != "name"}
 
             req = requests.post(self.url, data=test_data)
             assert variant["name"] == req.json()
 
     @pytest.mark.smoke
-    def test_empy_post(self):
+    def test_empty_post(self):
         test_data = {}
         req = requests.post(self.url, data=test_data).json()
         assert {} == req
@@ -88,93 +87,3 @@ class TestClass:
 
             response = requests.post(self.url, data=data).json()
             assert response == variant.get('name')
-
-
-class TestValidators:
-
-    @pytest.mark.valid
-    def test_email_validator(self):
-        valid_emails = (
-            'email@example.com',
-            'firstname.lastname@example.com',
-            'email@subdomain.example.com',
-            'firstname+lastname@example.com',
-            'firstname^lastname@example.com',
-            'firstname%lastname@example.com',
-            'firstname%lastname@example.com',
-            '1234567890@example.com',
-            'email@example-one.com',
-            '_______@example.com',
-            'email@example.name',
-            'email@example.museum',
-            'email@example.co.jp',
-            'firstname-lastname@example.com',
-        )
-        for email in valid_emails:
-            assert validate_email(email)
-
-        invalid_emails = (
-            '#@%^%#$@#$@#.com',
-            '@example.com',
-            'Joe Smith <email@example.com>',
-            'email.example.com',
-            'email@example@example.com',
-            '.email@example.com',
-            'email.@example.com',
-            'email..email@example.com',
-            'email@example.com (Joe Smith)',
-            'email@example',
-            'email@-example.com',
-            'email@111.222.333.44444',
-            'email@example..com',
-            'Abc..123@example.com',
-        )
-        for email in invalid_emails:
-            assert not validate_email(email)
-
-    @pytest.mark.valid
-    def test_phone_validator(self):
-        valid_phones = (
-            "+7 012 345 67 89 ",
-            "+7 123 456 78 90 ",
-        )
-        for phone in valid_phones:
-            assert validate_phone(phone)
-
-        invalid_phones = (
-            "7 123 456 78 90",
-            "8 123 456 78 90",
-            "+8 123 456 78 90",
-            "+7(123)4567890",
-            "+7-123-456-78-90",
-            "+7 (123) 456-78-90",
-            "8 (123) 456-78-90",
-        )
-        for phone in invalid_phones:
-            assert not validate_phone(phone)
-
-    @pytest.mark.valid
-    def test_date_validator(self):
-        "%d.%m.%Y"
-        "%Y - %m - %d"
-        valid_date = (
-            "30.04.1992",
-            "31.12.1999",
-            "01.01.2001",
-            "2020 - 07 - 01",
-            "2021 - 12 - 31",
-            "1999 - 01 - 01",
-        )
-        for date in valid_date:
-            assert validate_date(date)
-
-        invalid_date = (
-            "31.04.1992",
-            "29.02.2021",
-            "01.13.2001",
-            "202 - 07 - 01",
-            "2021 - 15 - 15",
-            "1999 - 00 - 01",
-        )
-        for date in invalid_date:
-            assert not validate_date(date)
