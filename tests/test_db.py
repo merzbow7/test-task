@@ -13,10 +13,9 @@ from utils import typing_request
 class TestClass:
 
     @pytest.fixture(autouse=True)
-    def initialized_tasks_db(self):
+    def initialized_tasks_db(self, count_tests):
         """Connect to db before testing, disconnect after."""
-        self.count_tests = 100
-
+        self.count_tests = count_tests
         self.path_db = Path(__file__).parent.parent / Config.DB
         self.db = TinyDB(self.path_db)
         self.url = 'http://127.0.0.1:5000/get_form'
@@ -34,9 +33,7 @@ class TestClass:
         self.db.close()
 
     def test_self_is_self(self):
-        """
-        get test self.db replace types random values same types and test itself
-        """
+        """get test self.db replace types random values same types and test itself"""
         size_db = len(self.db.all())
 
         for _ in range(self.count_tests):
@@ -62,7 +59,7 @@ class TestClass:
     def test_some_not_valid_data(self):
         size_db = len(self.db.all())
         for _ in range(self.count_tests):
-            variant = dict(self.db.get(doc_id=randint(0, size_db)))
+            variant = dict(self.db.get(doc_id=randint(1, size_db)))
             variant.pop("name")
             for key, value in variant.items():
                 variant[key] = self.test_types[value]()
@@ -78,7 +75,7 @@ class TestClass:
 
         size_db = len(self.db.all())
         for _ in range(self.count_tests):
-            variant = dict(self.db.get(doc_id=randint(0, size_db)))
+            variant = dict(self.db.get(doc_id=randint(1, size_db)))
 
             variant.update({"second_email_user": "email",
                             "home_phone_user": "phone"})
