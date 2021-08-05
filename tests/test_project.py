@@ -1,10 +1,12 @@
 # pytest
+import math
 from random import choice, randint
+from string import ascii_lowercase
 
 import pytest
 import requests
 
-from utils import typing_request
+from utils import typing_request, make_combinations_from_data, find_form_for_request
 
 test_types = {
     "text": lambda: choice(("test", "dsoifus9", "тест")),
@@ -16,6 +18,10 @@ test_types = {
 url = 'http://127.0.0.1:5000/get_form'
 
 
+def make_data(variant: dict) -> dict:
+    return {key: test_types[value]() for key, value in variant.items() if key != "name"}
+
+
 def test_self_is_self(initialized_db, count_tests):
     """
     get test db replace types random values same types and test itself
@@ -25,10 +31,9 @@ def test_self_is_self(initialized_db, count_tests):
 
     for _ in range(count_tests):
         variant = dict(db.get(doc_id=randint(1, size_db)))
-        test_data = {key: test_types[value]() for key, value in variant.items() if key != "name"}
+        test_data = make_data(variant)
 
-        req = requests.post(url, data=test_data)
-        assert variant["name"] == req.json()
+        assert variant["name"] == find_form_for_request(test_data, db)
 
 
 @pytest.mark.smoke
@@ -62,8 +67,7 @@ def test_some_not_valid_data(initialized_db, count_tests):
             if "email" in key:
                 variant[key] = "wrong_mail@mail@com"
 
-        response = requests.post(url, data=variant).json()
-        assert response != typed_data
+        assert find_form_for_request(typed_data, db) != typed_data
 
 
 def test_some_updated_random_data_from_db(initialized_db, count_tests):
@@ -73,6 +77,27 @@ def test_some_updated_random_data_from_db(initialized_db, count_tests):
         variant = dict(db.get(doc_id=randint(1, size_db)))
         variant.update({"second_email_user": "email",
                         "home_phone_user": "phone"})
-        data = {key: test_types[value]() for key, value in variant.items() if key != "name"}
-        response = requests.post(url, data=data).json()
-        assert response == variant.get('name')
+
+        data = make_data(variant)
+        assert find_form_for_request(data, db) == variant.get('name')
+
+
+def test_combinations_count(count_tests):
+    for _ in range(count_tests):
+        len_dict = randint(0, 18)
+        combinations = 0
+        for i in range(len_dict, 0, -1):
+            combinations += math.comb(len_dict, i)
+        test_dict = {char: index for index, char in enumerate(ascii_lowercase[:len_dict])}
+        variants = len(make_combinations_from_data(test_dict))
+        assert variants == combinations
+
+
+def test_combinations_once():
+    data = {'a': 0, 'b': 1, 'c': 2}
+    expect = [
+        {'a': 0, 'b': 1, 'c': 2},
+        {'a': 0, 'b': 1}, {'a': 0, 'c': 2}, {'b': 1, 'c': 2},
+        {'a': 0}, {'b': 1}, {'c': 2}
+    ]
+    assert expect == make_combinations_from_data(data)
