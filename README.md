@@ -3,8 +3,8 @@
 + **make_testcase.py - create test db**
 + **/tests/ - pytest**
 
-      Test coverage 
-  + config.py 100%
+      Test coverage
+  
   + utils.py 100%
   + validators.py 100%
 
